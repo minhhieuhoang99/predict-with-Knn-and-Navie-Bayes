@@ -79,8 +79,8 @@ def process_data(df):
 
 # Training KNN Classifier
 @st.cache(suppress_st_warning=True)
-def Knn_Classifier(X_train, X_test, y_train, y_test):
-    knn = KNeighborsClassifier(n_neighbors=13)
+def Knn_Classifier(X_train, X_test, y_train, y_test,knn_slider):
+    knn = KNeighborsClassifier(n_neighbors=knn_slider)
     knn.fit(X_train, y_train)
     y_pred = knn.predict(X_test)
     score = metrics.accuracy_score(y_test, y_pred) * 100
@@ -196,7 +196,7 @@ def main():
         st.write("Chưa Có Chi ")
 
     if(choose_model == "Navie-Bayes"):
-        st.title("Dự đoán sự hài của khách hàng với chuyến bay sự dụng thuật toán Navie-Bayes")
+        st.title("Dự đoán sự hài lòng của khách hàng với chuyến bay sự dụng thuật toán Navie-Bayes")
         # X_train, X_test, y_train, y_test, le = process_data(df_train)
         score, report, gnb = Naive_bayes(X_train, X_test, y_train, y_test)
         st.text("Độ chính xác của mô hình Naive_bayes là: ")
@@ -227,16 +227,19 @@ def main():
     
 
     elif(choose_model == "K-Nearest Neighbours"):
-        st.title("Dự đoán sự hài của khách hàng với chuyến bay sự dụng thuật toán K-Nearest Neighbours")
-        score, report, knn = Knn_Classifier(X_train, X_test, y_train, y_test)
-        st.text("Độ chính xác của mô hình K-Nearest Neighbour là: ")
-        st.write(score,"%")
-        st.text("Báo cáo mô hình K-Nearest Neighbour: ")
-        st.write(report)
-        lpd = load_print_data() 
-        st.write(lpd)
-        user_prediction_data , user_prediction_data_encode = accept_user_data()
-        st.write(user_prediction_data)
+        st.title("Dự đoán sự hài lòng của khách hàng với chuyến bay sự dụng thuật toán K-Nearest Neighbours")
+        knn_slider  = st.slider("knn:",3, 101, 55, 2)
+        if(knn_slider):
+            score, report, knn = Knn_Classifier(X_train, X_test, y_train, y_test,knn_slider)
+            st.write("Độ chính xác của mô hình K-Nearest Neighbour với k =",knn_slider," là: ")
+            st.write(score,"%")
+            st.text("Báo cáo mô hình K-Nearest Neighbour: ") 
+            st.write(report)
+            lpd = load_print_data()
+            # knn_slider = st.slider("knn:",3, 101, 55, 2) 
+            st.write(lpd)
+            user_prediction_data , user_prediction_data_encode = accept_user_data()
+            st.write(user_prediction_data)
         
         try:
             if(st.button(" Dự đoán ")):
