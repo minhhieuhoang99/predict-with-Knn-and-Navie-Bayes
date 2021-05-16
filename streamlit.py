@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
@@ -73,7 +75,7 @@ def process_data(df):
     df['Type of Travel'] = df['Type of Travel'].apply(transform_travel_type)
     df['Class'] = df['Class'].apply(transform_class)
     df['satisfaction'] = df['satisfaction'].apply(transform_satisfaction)
-    df['Arrival Delay in Minutes'].fillna(df['Arrival Delay in Minutes'].median(), inplace = True)
+    df['Arrival Delay in Minutes'].fillna(df['Arrival Delay in Minutes'].median(), inplace = True) #điền giá trị thiếu
     
     return df
 
@@ -152,7 +154,7 @@ for i in range(len(list_of_names)):
     dataframes_list.append(temp_df) 
 # @st.cache
 # def loadData():
-    
+st.set_option('deprecation.showPyplotGlobalUse', False)   
 df_train = dataframes_list[0]
 df_test = dataframes_list[1]
     
@@ -193,7 +195,79 @@ def main():
     # ML Section
     choose_model = st.sidebar.selectbox("Tùy Chọn",["Báo Cáo", "K-Nearest Neighbours" , "Navie-Bayes"])
     if(choose_model == "Báo Cáo"):
-        st.write("Chưa Có Chi ")
+        st.title("Đồ thị hóa dữ liệu")
+        st.subheader("1. Dữ liệu thu thập") 
+        st.write(df_train.head(100))
+        st.write('Tổng số bản ghi dữ liệu huấn luyện:',df_train.shape[0])
+        st.write('Tổng số bản ghi dữ liệu thử nghiệm:',df_test.shape[0])
+        st.write('Tổng số thuộc Tính:',df_train.shape[1]-3)
+        st.write(df_train.dtypes)
+        st.write(df_train.describe())
+        st.write("Kiểm tra dữ liệu thiếu sót")
+        # df_train.columns = [c.replace(' ', '_') for c in train.columns]
+        total = df_train.isnull().sum().sort_values(ascending=False)
+        percent = (df_train.isnull().sum()/df_train.isnull().count()*100).sort_values(ascending=False)
+        missing = pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])
+        st.table(missing.head())
+        # fig = plt.figure(figsize = (8,5))
+        sns.boxplot(x = df_train['Arrival Delay in Minutes'], y = None)
+        plt.title('Bảng thống kê thời gian khởi hành muộn', fontsize = 12)
+        st.pyplot(plt.show())
+
+        st.subheader("2. Kiểm tra sự cân bằng của biến mục tiêu") 
+
+        # fig = plt.figure(figsize = (8,5))
+        # train.satisfaction.value_counts(normalize = True).plot(kind='bar', color= ['darkorange','steelblue'], alpha = 0.9, rot=0)
+        # plt.title('Độ cân bằng của biến mục tiêu', fontsize = 15)
+        # plt.xlabel('Biến Mục Tiêu', fontsize = 15)
+        # plt.ylabel('', fontsize = 15)
+        # st.pyplot(fig)
+
+        df_target = df_train['satisfaction']
+        df_target.value_counts()
+        fig = plt.figure(figsize = (8,5))
+        sns.countplot(x = df_target,palette='husl')
+        plt.text(x = 0.95, y = df_target.value_counts()[1] + 1, s = str(round((df_target.value_counts()[1])*100/len(df_target),2)) + '%')
+        plt.text(x = -0.05, y = df_target.value_counts()[0] +1, s = str(round((df_target.value_counts()[0])*100/len(df_target),2)) + '%')
+        plt.title('Độ cân bằng của biến mục tiêu', fontsize = 15)
+        plt.xlabel('Biến Mục Tiêu', fontsize = 15)
+        plt.ylabel('', fontsize = 15)
+        st.pyplot(fig)
+
+        st.subheader("3. Biểu đồ thống kê sự hài lòng theo giới tính") 
+        
+        pd.crosstab(df_train.Gender,df_train.satisfaction).plot(kind="bar",figsize=(15,6))
+        plt.title('Sự hài lòng theo giới tính')
+        plt.xticks(rotation=0)
+        plt.legend(['neutral/dissatisfied', 'Satisfied'])
+        plt.ylabel('Frequency')
+        st.pyplot(plt.show())
+        
+
+        st.subheader("2. Biểu đồ nhiệt") 
+        corr = train.corr(method='spearman')
+        # Generate a mask for the upper triangle
+        mask = np.zeros_like(corr, dtype=np.bool)
+        mask[np.triu_indices_from(mask)] = True
+        cmap = sns.diverging_palette(150, 1, as_cmap=True)
+
+        # Set up the matplotlib figure
+        heatmap, ax = plt.subplots(figsize=(20, 18))
+
+        
+
+        # Draw the heatmap with the mask and correct aspect ratio
+        
+        sns.heatmap(corr, annot = True, mask=mask, cmap=cmap, center=0,
+            square=True, linewidths=.5)
+        st.pyplot(heatmap)
+
+        st.subheader("3. Xây dựng mô hình")
+        st.write("Naive bayes")
+        st.write("K-Nearest Neighbor")
+
+
+        
 
     if(choose_model == "Navie-Bayes"):
         st.title("Dự đoán sự hài lòng của khách hàng với chuyến bay sự dụng thuật toán Navie-Bayes")
