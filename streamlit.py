@@ -234,7 +234,7 @@ def main():
         plt.ylabel('', fontsize = 15)
         st.pyplot(fig)
 
-        st.subheader("3. Biểu đồ thống kê sự hài lòng theo giới tính") 
+        st.subheader("3. Biểu đồ phân bố sự hài lòng theo giới tính") 
         
         pd.crosstab(df_train.Gender,df_train.satisfaction).plot(kind="bar",figsize=(15,6))
         plt.title('Sự hài lòng theo giới tính')
@@ -243,7 +243,7 @@ def main():
         plt.ylabel('Tần số')
         st.pyplot(plt.show())
 
-        st.subheader("4. Biểu đồ thống kê sự hài lòng theo loại khách hàng") 
+        st.subheader("4. Biểu đồ phân bố sự hài lòng theo loại khách hàng") 
         
         pd.crosstab(df_train['Customer Type'],df_train.satisfaction).plot(kind="bar",figsize=(15,6))
         plt.title('Sự hài lòng theo loại khách hàng')
@@ -252,6 +252,11 @@ def main():
         plt.ylabel('Tần số')
         st.pyplot(plt.show())
         
+        st.subheader("5. Biểu đồ phân bố sự hài lòng theo độ tuổi") 
+        g = sns.catplot("Age", data=df_train, aspect=4.0, kind='count', hue='satisfaction', order=range(5, 80))
+        plt.legend(['Phân vân/Không hài lòng', 'Hài lòng'])
+        g.set_ylabels('Sự hài lòng theo độ tuổi')
+        st.pyplot(plt.show())
 
         st.subheader("2. Biểu đồ nhiệt") 
         corr = train.corr(method='spearman')
