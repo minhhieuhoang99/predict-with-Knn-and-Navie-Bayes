@@ -239,8 +239,17 @@ def main():
         pd.crosstab(df_train.Gender,df_train.satisfaction).plot(kind="bar",figsize=(15,6))
         plt.title('Sự hài lòng theo giới tính')
         plt.xticks(rotation=0)
-        plt.legend(['neutral/dissatisfied', 'Satisfied'])
-        plt.ylabel('Frequency')
+        plt.legend(['Phân vân/Không hài lòng', 'Hài lòng'])
+        plt.ylabel('Tần số')
+        st.pyplot(plt.show())
+
+        st.subheader("4. Biểu đồ thống kê sự hài lòng theo loại khách hàng") 
+        
+        pd.crosstab(df_train['Customer Type'],df_train.satisfaction).plot(kind="bar",figsize=(15,6))
+        plt.title('Sự hài lòng theo loại khách hàng')
+        plt.xticks(rotation=0)
+        plt.legend(['Phân vân/Không hài lòng', 'Hài lòng'])
+        plt.ylabel('Tần số')
         st.pyplot(plt.show())
         
 
