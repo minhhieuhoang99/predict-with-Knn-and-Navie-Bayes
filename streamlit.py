@@ -69,7 +69,7 @@ def transform_satisfaction(x):
         return -1
     
 def process_data(df):
-    df = df.drop(['Unnamed: 0', 'id'], axis = 1)
+    df = df.drop(['stt', 'id'], axis = 1)
     df['Gender'] = df['Gender'].apply(transform_gender)
     df['Customer Type'] = df['Customer Type'].apply(transform_customer_type)
     df['Type of Travel'] = df['Type of Travel'].apply(transform_travel_type)
@@ -157,9 +157,10 @@ for i in range(len(list_of_names)):
 st.set_option('deprecation.showPyplotGlobalUse', False)   
 df_train = dataframes_list[0]
 df_test = dataframes_list[1]
-    
+df_trainx = df_train.drop(['stt', 'id'], axis = 1)
 
 train = process_data(df_train)
+
 test = process_data(df_test)
 
 features = ['Gender', 'Customer Type', 'Age', 'Type of Travel', 'Class',
@@ -201,12 +202,12 @@ def main():
         st.write('Tổng số bản ghi dữ liệu huấn luyện:',df_train.shape[0])
         st.write('Tổng số bản ghi dữ liệu thử nghiệm:',df_test.shape[0])
         st.write('Tổng số thuộc Tính:',df_train.shape[1]-3)
-        st.write(df_train.dtypes)
-        st.write(df_train.describe())
+        st.write(df_trainx.dtypes)
+        st.write(df_trainx.describe())
         st.write("Kiểm tra dữ liệu thiếu sót")
         # df_train.columns = [c.replace(' ', '_') for c in train.columns]
-        total = df_train.isnull().sum().sort_values(ascending=False)
-        percent = (df_train.isnull().sum()/df_train.isnull().count()*100).sort_values(ascending=False)
+        total = df_trainx.isnull().sum().sort_values(ascending=False)
+        percent = (df_trainx.isnull().sum()/df_train.isnull().count()*100).sort_values(ascending=False)
         missing = pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])
         st.table(missing.head())
         # fig = plt.figure(figsize = (8,5))
@@ -223,7 +224,7 @@ def main():
         # plt.ylabel('', fontsize = 15)
         # st.pyplot(fig)
 
-        df_target = df_train['satisfaction']
+        df_target = df_trainx['satisfaction']
         df_target.value_counts()
         fig = plt.figure(figsize = (8,5))
         sns.countplot(x = df_target,palette='husl')
@@ -236,7 +237,7 @@ def main():
 
         st.subheader("3. Biểu đồ phân bố sự hài lòng theo giới tính") 
         
-        pd.crosstab(df_train.Gender,df_train.satisfaction).plot(kind="bar",figsize=(15,6))
+        pd.crosstab(df_trainx.Gender,df_trainx.satisfaction).plot(kind="bar",figsize=(15,6))
         plt.title('Sự hài lòng theo giới tính')
         plt.xticks(rotation=0)
         plt.legend(['Phân vân/Không hài lòng', 'Hài lòng'])
@@ -245,7 +246,7 @@ def main():
 
         st.subheader("4. Biểu đồ phân bố sự hài lòng theo loại khách hàng") 
         
-        pd.crosstab(df_train['Customer Type'],df_train.satisfaction).plot(kind="bar",figsize=(15,6))
+        pd.crosstab(df_trainx['Customer Type'],df_trainx.satisfaction).plot(kind="bar",figsize=(15,6))
         plt.title('Sự hài lòng theo loại khách hàng')
         plt.xticks(rotation=0)
         plt.legend(['Phân vân/Không hài lòng', 'Hài lòng'])
@@ -253,10 +254,36 @@ def main():
         st.pyplot(plt.show())
         
         st.subheader("5. Biểu đồ phân bố sự hài lòng theo độ tuổi") 
-        g = sns.catplot("Age", data=df_train, aspect=4.0, kind='count', hue='satisfaction', order=range(5, 80))
+        g = sns.catplot("Age", data=df_trainx, aspect=4.0, kind='count', hue='satisfaction', order=range(5, 80))
         plt.legend(['Phân vân/Không hài lòng', 'Hài lòng'])
         g.set_ylabels('Sự hài lòng theo độ tuổi')
         st.pyplot(plt.show())
+
+
+        st.subheader("6. Biểu đồ các yếu tố khác (Thời gian khởi hành/kết thúc muộn, dịch vụ check-in và Khoảng cách Chuyến bay...)")
+        fig = plt.figure(figsize=(12,18))
+        df_num = df_trainx.select_dtypes(include=np.number)
+        for i in range(len(df_num.columns)):
+            fig.add_subplot(9,4,i+1)
+            sns.boxplot(y=df_num.iloc[:,i])
+
+        plt.tight_layout()
+        st.pyplot(plt.show())
+
+
+
+
+
+
+
+        st.subheader("5. Phân phối các biến số") 
+        df_trainx.drop('satisfaction', axis = 1).hist()
+        plt.tight_layout()
+        st.pyplot(plt.show())
+        st.write(df_trainx.drop('satisfaction', axis = 1).skew())
+        
+
+
 
         st.subheader("2. Biểu đồ nhiệt") 
         corr = train.corr(method='spearman')
