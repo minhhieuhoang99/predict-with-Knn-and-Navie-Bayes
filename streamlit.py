@@ -227,7 +227,7 @@ def main():
         df_target = df_trainx['satisfaction']
         df_target.value_counts()
         fig = plt.figure(figsize = (8,5))
-        sns.countplot(x = df_target,palette='husl')
+        sns.countplot(x = df_target)
         plt.text(x = 0.95, y = df_target.value_counts()[1] + 1, s = str(round((df_target.value_counts()[1])*100/len(df_target),2)) + '%')
         plt.text(x = -0.05, y = df_target.value_counts()[0] +1, s = str(round((df_target.value_counts()[0])*100/len(df_target),2)) + '%')
         plt.title('Độ cân bằng của biến mục tiêu', fontsize = 15)
@@ -276,7 +276,7 @@ def main():
 
 
 
-        st.subheader("5. Phân phối các biến số") 
+        st.subheader("7. Phân phối các biến số") 
         df_trainx.drop('satisfaction', axis = 1).hist()
         plt.tight_layout()
         st.pyplot(plt.show())
@@ -310,7 +310,7 @@ def main():
 
         
 
-    if(choose_model == "Navie-Bayes"):
+    elif(choose_model == "Navie-Bayes"):
         st.title("Dự đoán sự hài lòng của khách hàng với chuyến bay sự dụng thuật toán Navie-Bayes")
         # X_train, X_test, y_train, y_test, le = process_data(df_train)
         score, report, gnb = Naive_bayes(X_train, X_test, y_train, y_test)
